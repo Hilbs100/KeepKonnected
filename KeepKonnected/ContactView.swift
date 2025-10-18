@@ -4,9 +4,7 @@ import Contacts
 import ContactsUI
 import UIKit
 
-// Testing 
-
-struct ContentView: View {
+struct ContactView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: [SortDescriptor(\Contact.givenName)]) private var contacts: [Contact]
 
@@ -133,8 +131,6 @@ struct ContactPicker: UIViewControllerRepresentable {
             CNContactEmailAddressesKey,
             CNContactThumbnailImageDataKey
         ]
-        // allow multiple selection
-        picker.predicateForEnablingContact = NSPredicate(value: true)
         return picker
     }
 
@@ -158,9 +154,9 @@ struct ContactPicker: UIViewControllerRepresentable {
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
+struct ContactView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        ContactView()
             .modelContainer(for: [Contact.self])
     }
 }
