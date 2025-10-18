@@ -18,7 +18,10 @@ struct KeepKonnectedApp: App {
             Group {
                 if introState.value == 4 {
                     // Main app
-                    ContactView()
+                    ContactView(contact_type: .highPriority)
+                        .modelContainer(for: [Contact.self])
+                        .environmentObject(introState)
+                    ContactView(contact_type: .regularPriority)
                         .modelContainer(for: [Contact.self])
                         .environmentObject(introState)
                 } else {

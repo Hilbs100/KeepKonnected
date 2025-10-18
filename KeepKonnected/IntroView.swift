@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 // Very Basic Introduction Pages
 
@@ -49,8 +50,8 @@ struct IntroPage2: View {
     @EnvironmentObject private var introState: IntroState
     var body: some View {
         VStack {
-            Text("Learn how KeepKonnected helps you stay in touch.")
-                .font(.title)
+            ContactView(contact_type: .highPriority)
+                .modelContainer(for: [Contact.self])
             
             Button(action: { introState.value = 3 }) {
                 Text("Next")
@@ -69,11 +70,11 @@ struct IntroPage3: View {
     @EnvironmentObject private var introState: IntroState
     var body: some View {
         VStack {
-            Text("Get started now!")
-                .font(.headline)
+            ContactView(contact_type: .regularPriority)
+                .modelContainer(for: [Contact.self])
             
             Button(action: { introState.value = 4 }) {
-                Text("Get Started")
+                Text("Finished")
                     .font(.headline)
                     .padding()
                     .background(Color.green)

@@ -8,6 +8,11 @@
 import Foundation
 import SwiftData
 
+enum ContactType: Int, Codable {
+    case highPriority = 0
+    case regularPriority = 1
+}
+
 @Model
 final class Contact: Identifiable {
     // the CNContact.identifier is stable and we keep it so we can dedupe imports
@@ -16,26 +21,29 @@ final class Contact: Identifiable {
     var familyName: String
     var phoneNumbers: [String]
     var emailAddresses: [String]
+    var contact_type: ContactType
     var thumbnailData: Data?
-
+    
     var id: String { identifier }
-
+    
     var displayName: String {
         let name = [givenName, familyName].filter { !$0.isEmpty }.joined(separator: " ")
         return name.isEmpty ? "No Name" : name
     }
-
+    
     init(identifier: String = UUID().uuidString,
          givenName: String = "",
          familyName: String = "",
          phoneNumbers: [String] = [],
          emailAddresses: [String] = [],
-         thumbnailData: Data? = nil) {
+         thumbnailData: Data? = nil,
+         type: ContactType = .regularPriority) {
         self.identifier = identifier
         self.givenName = givenName
         self.familyName = familyName
         self.phoneNumbers = phoneNumbers
         self.emailAddresses = emailAddresses
         self.thumbnailData = thumbnailData
+        self.contact_type = type
     }
 }
