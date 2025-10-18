@@ -4,6 +4,8 @@ import Contacts
 import ContactsUI
 import UIKit
 
+// Testing 
+
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: [SortDescriptor(\Contact.givenName)]) private var contacts: [Contact]
