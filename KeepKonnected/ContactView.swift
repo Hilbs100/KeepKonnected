@@ -12,6 +12,7 @@ struct ContactView: View {
     @State private var alertMessage: AlertMessage?
     @State private var showingPicker = false
     
+    
     private var title: String {
         switch contact_type {
         case .highPriority:
@@ -32,39 +33,46 @@ struct ContactView: View {
     
     var body: some View {
         NavigationView {
-            List {
-                let visibleContacts = contacts.filter { $0.contact_type == contact_type }
-                
-                if visibleContacts.isEmpty {
-                    Text(emptyMessage)
-                        .foregroundStyle(.secondary)
-                } else {
-                    ForEach(visibleContacts) { c in
-                        HStack {
-                            if let data = c.thumbnailData, let uiImage = UIImage(data: data) {
-                                Image(uiImage: uiImage)
-                                    .resizable()
-                                    .frame(width: 44, height: 44)
-                                    .clipShape(Circle())
-                            } else {
-                                Circle()
-                                    .fill(Color.accentColor.opacity(0.2))
-                                    .frame(width: 44, height: 44)
-                                    .overlay(Text(String(c.displayName.prefix(1))).font(.headline))
-                            }
-                            
-                            VStack(alignment: .leading) {
-                                Text(c.displayName).font(.headline)
-                                if let firstPhone = c.phoneNumbers.first {
-                                    Text(firstPhone).font(.subheadline).foregroundStyle(.secondary)
-                                } else if let firstEmail = c.emailAddresses.first {
-                                    Text(firstEmail).font(.subheadline).foregroundStyle(.secondary)
+            
+            ZStack {
+                Color("IntroBackground")
+                    .ignoresSafeArea()
+                List {
+                    let visibleContacts = contacts.filter { $0.contact_type == contact_type }
+                    
+                    if visibleContacts.isEmpty {
+                        Text(emptyMessage)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(visibleContacts) { c in
+                            HStack {
+                                if let data = c.thumbnailData, let uiImage = UIImage(data: data) {
+                                    Image(uiImage: uiImage)
+                                        .resizable()
+                                        .frame(width: 44, height: 44)
+                                        .clipShape(Circle())
+                                } else {
+                                    Circle()
+                                        .fill(Color.accentColor.opacity(0.2))
+                                        .frame(width: 44, height: 44)
+                                        .overlay(Text(String(c.displayName.prefix(1))).font(.headline))
+                                }
+                                
+                                VStack(alignment: .leading) {
+                                    Text(c.displayName).font(.headline)
+                                    if let firstPhone = c.phoneNumbers.first {
+                                        Text(firstPhone).font(.subheadline).foregroundStyle(.secondary)
+                                    } else if let firstEmail = c.emailAddresses.first {
+                                        Text(firstEmail).font(.subheadline).foregroundStyle(.secondary)
+                                    }
                                 }
                             }
                         }
+                        .onDelete(perform: delete)
                     }
-                    .onDelete(perform: delete)
                 }
+                // .listStyle(.plain)
+                .scrollContentBackground(.hidden)
             }
             .navigationTitle(title)
             .toolbar {
@@ -128,11 +136,27 @@ struct ContactView: View {
     }
     
     private func delete(at offsets: IndexSet) {
-        for index in offsets {
-            let c = contacts[index]
-            modelContext.delete(c)
+        // compute visible contacts for the current `contact_type`
+        let visible = contacts.filter { $0.contact_type == contact_type }
+        
+        // collect identifiers for the rows being deleted
+        let idsToDelete = offsets.compactMap { idx -> String? in
+            guard idx < visible.count else { return nil }
+            return visible[idx].identifier
         }
-        do { try modelContext.save() } catch { print("Delete save error: \(error)") }
+        
+        // delete matching managed objects by identifier from the full `contacts` query
+        for id in idsToDelete {
+            if let match = contacts.first(where: { $0.identifier == id }) {
+                modelContext.delete(match)
+            }
+        }
+        
+        do {
+            try modelContext.save()
+        } catch {
+            print("Delete save error: \(error)")
+        }
     }
 }
 
