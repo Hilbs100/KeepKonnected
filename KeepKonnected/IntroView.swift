@@ -21,7 +21,7 @@ struct IntroPage1: View {
                     .font(.title2)
                 Text("On the first page, you'll put in 3 to 5 contacts that you want reminders to be contacted about approximately weekly.")
                     .font(.subheadline)
-                Text("On the second page, you'll enter about 5 to 10 contacts that you want reminders about approximately monthly.")
+                Text("On the second page, you'll enter about 5 to 10 different contacts that you want reminders about approximately monthly.")
                     .font(.subheadline)
             }
             .multilineTextAlignment(.leading)
@@ -50,7 +50,7 @@ struct IntroPage2: View {
     @EnvironmentObject private var introState: IntroState
     var body: some View {
         VStack {
-            ContactView(contact_type: .highPriority)
+            ContactView(contact_type: .weekly)
                 .modelContainer(for: [Contact.self])
             
             Button(action: { introState.value = 3 }) {
@@ -70,7 +70,7 @@ struct IntroPage3: View {
     @EnvironmentObject private var introState: IntroState
     var body: some View {
         VStack {
-            ContactView(contact_type: .regularPriority)
+            ContactView(contact_type: .monthly)
                 .modelContainer(for: [Contact.self])
             
             Button(action: { introState.value = 4 }) {
@@ -111,7 +111,8 @@ struct IntroRoot: View {
                     IntroPage3()
                 default:
                     // If value is 4 (or any other unexpected value), go to the main app; keep a placeholder
-                    IntroPage1() // fallback; in the App we switch to ContactView when value == 4
+                    HomeView() // fallback; in the App we switch to ContactView when value == 4
+                        .modelContainer(for: [Contact.self])
                 }
             }
         }

@@ -9,8 +9,8 @@ import Foundation
 import SwiftData
 
 enum ContactType: Int, Codable {
-    case highPriority = 0
-    case regularPriority = 1
+    case weekly = 0
+    case monthly = 1
 }
 
 @Model
@@ -37,7 +37,7 @@ final class Contact: Identifiable {
          phoneNumbers: [String] = [],
          emailAddresses: [String] = [],
          thumbnailData: Data? = nil,
-         type: ContactType = .regularPriority) {
+         type: ContactType = .monthly) {
         self.identifier = identifier
         self.givenName = givenName
         self.familyName = familyName

@@ -22,21 +22,17 @@ struct KeepKonnectedApp: App {
             Group {
                 if introState.value == 4 {
                     // Main app
-                    ContactView(contact_type: .highPriority)
+                    HomeView()
                         .modelContainer(for: [Contact.self])
-                        .environmentObject(introState)
-                    ContactView(contact_type: .regularPriority)
-                        .modelContainer(for: [Contact.self])
-                        .environmentObject(introState)
                 } else {
                     // Show the appropriate intro page(s)
                     IntroRoot()
                         .environmentObject(introState)
                 }
             }
-            .environmentObject(introState).onAppear {
-                introState.enableIntro()
-            }
+//            .environmentObject(introState).onAppear {
+//                introState
+//            }
         }
     }
 }

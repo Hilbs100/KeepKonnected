@@ -15,18 +15,18 @@ struct ContactView: View {
     
     private var title: String {
         switch contact_type {
-        case .highPriority:
+        case .weekly:
             return "Weekly Contacts"
-        case .regularPriority:
+        case .monthly:
             return "Monthly Contacts"
         }
     }
     
     private var emptyMessage: String {
         switch contact_type {
-        case .highPriority:
+        case .weekly:
             return "Insert contacts you want to be reminded to contact approximately weekly."
-        case .regularPriority:
+        case .monthly:
             return "Insert contacts you want to be reminded to contact approximately monthly."
         }
     }
@@ -208,24 +208,24 @@ struct ContactPicker: UIViewControllerRepresentable {
     }
 }
 
-#Preview("ContactView - High Priority") {
-    ContactView(contact_type: .highPriority)
+#Preview("ContactView - Weekly") {
+    ContactView(contact_type: .weekly)
         .modelContainer(for: Contact.self)
 }
 
-#Preview("ContactView - Regular Priority") {
-    ContactView(contact_type: .regularPriority)
+#Preview("ContactView - Monthly") {
+    ContactView(contact_type: .monthly)
         .modelContainer(for: Contact.self)
 }
 
-#Preview("ContactView - High Priority (Dark)") {
-    ContactView(contact_type: .highPriority)
+#Preview("ContactView - Weekly (Dark)") {
+    ContactView(contact_type: .weekly)
         .modelContainer(for: Contact.self)
         .preferredColorScheme(.dark)
 }
 
-#Preview("ContactView - Regular Priority (Dark)") {
-    ContactView(contact_type: .regularPriority)
+#Preview("ContactView - Monthly (Dark)") {
+    ContactView(contact_type: .monthly)
         .modelContainer(for: Contact.self)
         .preferredColorScheme(.dark)
 }
