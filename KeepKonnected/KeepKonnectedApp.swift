@@ -31,7 +31,7 @@ struct KeepKonnectedApp: App {
                 }
             }
 //            .environmentObject(introState).onAppear {
-//                introState
+//                introState.enableIntro()
 //            }
         }
     }

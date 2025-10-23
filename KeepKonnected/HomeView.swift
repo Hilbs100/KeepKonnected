@@ -15,7 +15,7 @@ struct HomeView: View {
     var body: some View {
         ZStack {
             // Show the ContactView for the selected type
-            ContactView(contact_type: selectedType)
+            ContactsView(contact_type: selectedType)
 
             // Bottom nav dock
             VStack {
@@ -51,17 +51,22 @@ struct HomeView: View {
                 .padding(.horizontal, 60)
                 .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .padding(.horizontal, 16)
-                .padding(.bottom, safeAreaBottomPadding())
             }
             .animation(.default, value: selectedType)
         }
+        .padding(.bottom, safeAreaBottomPadding())
     }
 
     // Helper to respect safe area on devices with home indicator
     private func safeAreaBottomPadding() -> CGFloat {
-        UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .first?.windows.first?.safeAreaInsets.bottom ?? 16
+        let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        // prefer the key window, fall back to the first window in the first scene
+        let window = scenes
+            .flatMap { $0.windows }
+            .first(where: { $0.isKeyWindow }) ?? scenes.first?.windows.first
+
+        let inset = window?.safeAreaInsets.bottom ?? 0
+        return max(inset, 32) // ensure at least 32 points of padding when inset is zero
     }
 }
 
