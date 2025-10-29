@@ -120,5 +120,6 @@ struct ContactDetailView: View {
             .navigationTitle(contact.displayName)
             .navigationBarTitleDisplayMode(.inline)
         }
+        .onAppear(perform: contact.createNotification)
     }
 }

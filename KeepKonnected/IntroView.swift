@@ -95,16 +95,19 @@ struct IntroPage3: View {
 struct IntroRoot: View {
     @EnvironmentObject private var introState: IntroState
     var body: some View {
-        VStack(alignment: .leading) {
-            Text("Welcome to KeepKonnected")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .frame(maxWidth: .infinity, alignment: .center)
-                .multilineTextAlignment(.center)
-                .lineLimit(nil) // Allow unlimited lines
-                .fixedSize(horizontal: false, vertical: true) // Allow vertical expansion
+        if (introState.value > 0 && introState.value < 4) {
+            
+            VStack(alignment: .leading) {
+                Text("Welcome to KeepKonnected")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(nil) // Allow unlimited lines
+                    .fixedSize(horizontal: false, vertical: true) // Allow vertical expansion
+            }
+            .padding(.top, 40)
         }
-        .padding(.top, 40)
         NavigationView {
             Group {
                 switch introState.value {
@@ -117,6 +120,7 @@ struct IntroRoot: View {
                 default:
                     // If value is 4 (or any other unexpected value), go to the main app; keep a placeholder
                     HomeView() // fallback; in the App we switch to HomeView when value == 4
+                        .environmentObject(AppState())
                         .modelContainer(for: [Contact.self])
                 }
             }

@@ -4,16 +4,16 @@ import SwiftData
 
 struct HomeView: View {
     @State private var selectedType: ContactType = .weekly
-    @State private var selectedContactID: String? = nil
+    @EnvironmentObject var appState: AppState
 
     var body: some View {
         NavigationStack {
             ZStack {
                 // Show the ContactView for the selected type (no internal NavigationStack)
-                ContactsView(contact_type: selectedType, selection: $selectedContactID)
+                ContactsView(contact_type: selectedType, selection: $appState.selectedContactID)
 
                 // Bottom nav dock — hidden when a contact is selected (detail pushed)
-                if selectedContactID == nil {
+                if appState.selectedContactID == nil {
                     VStack {
                         Spacer()
                         HStack(spacing: 100) {
@@ -69,5 +69,6 @@ struct HomeView: View {
 
 #Preview("HomeView") {
     HomeView()
+        .environmentObject(AppState())
         .modelContainer(for: [Contact.self])
 }

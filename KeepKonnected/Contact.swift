@@ -8,6 +8,7 @@
 import Foundation
 import SwiftData
 import Contacts
+import UserNotifications
 
 enum ContactType: Int, Codable {
     case weekly = 0
@@ -77,6 +78,33 @@ final class Contact: Identifiable, Equatable {
         }
         
     }
+    
+    func createNotification() {
+        print("Notification Started for contact \(self.displayName)")
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
+                if granted {
+                    print("Notification permission granted")
+                } else if let error = error {
+                    print("Notification permission error: \(error.localizedDescription)")
+                }
+            }
+
+            let content = UNMutableNotificationContent()
+            content.title = "Call \(self.displayName)"
+            content.body = "Here is your reminder to Keep Konnected with \(self.givenName)!"
+            content.sound = .default
+            // include the contact identifier so the app knows which contact to show
+            content.userInfo = ["contactID": self.identifier]
+
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 20.0, repeats: false)
+            let request = UNNotificationRequest(identifier: "sh.KeepKonnected.\(self.identifier)", content: content, trigger: trigger)
+
+            UNUserNotificationCenter.current().add(request) { error in
+                if let error = error {
+                    print("Error scheduling notification: \(error.localizedDescription)")
+                }
+            }
+        }
     
     static func == (lhs: Contact, rhs: Contact) -> Bool {
         lhs.id == rhs.id

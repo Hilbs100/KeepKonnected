@@ -35,10 +35,7 @@ struct ContactsView: View {
     }
 
     var body: some View {
-        ZStack {
-            Color("IntroBackground")
-                .ignoresSafeArea()
-            
+        ZStack {            
             List {
                 let visibleContacts = contacts.filter { $0.contact_type == contact_type }
                 
