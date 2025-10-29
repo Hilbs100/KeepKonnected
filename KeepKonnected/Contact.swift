@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftData
+import Contacts
 
 enum ContactType: Int, Codable {
     case weekly = 0
@@ -14,7 +15,7 @@ enum ContactType: Int, Codable {
 }
 
 @Model
-final class Contact: Identifiable {
+final class Contact: Identifiable, Equatable {
     // the CNContact.identifier is stable and we keep it so we can dedupe imports
     var identifier: String
     var givenName: String
@@ -23,6 +24,7 @@ final class Contact: Identifiable {
     var emailAddresses: [String]
     var contact_type: ContactType
     var thumbnailData: Data?
+    var order: Int
     
     var id: String { identifier }
     
@@ -37,7 +39,9 @@ final class Contact: Identifiable {
          phoneNumbers: [String] = [],
          emailAddresses: [String] = [],
          thumbnailData: Data? = nil,
-         type: ContactType = .monthly) {
+         type: ContactType = .monthly,
+         order: Int = 0)
+    {
         self.identifier = identifier
         self.givenName = givenName
         self.familyName = familyName
@@ -45,5 +49,36 @@ final class Contact: Identifiable {
         self.emailAddresses = emailAddresses
         self.thumbnailData = thumbnailData
         self.contact_type = type
+        self.order = order
+    }
+    
+    func refresh () {
+        let contactStore = CNContactStore()
+        
+        let keysToFetch = [
+            CNContactGivenNameKey,
+            CNContactFamilyNameKey,
+            CNContactPhoneNumbersKey,
+            CNContactEmailAddressesKey,
+            CNContactThumbnailImageDataKey
+        ]
+        
+        do {
+            let cn = try contactStore.unifiedContact(withIdentifier: self.identifier, keysToFetch: keysToFetch as [CNKeyDescriptor])
+            self.givenName = cn.givenName
+            self.familyName = cn.familyName
+            self.phoneNumbers = cn.phoneNumbers.map { $0.value.stringValue }
+            self.emailAddresses = cn.emailAddresses.map { String($0.value) }
+            self.thumbnailData = cn.thumbnailImageData
+        }
+        catch {
+            print("Failed to fetch contact: \(error)")
+            return
+        }
+        
+    }
+    
+    static func == (lhs: Contact, rhs: Contact) -> Bool {
+        lhs.id == rhs.id
     }
 }
