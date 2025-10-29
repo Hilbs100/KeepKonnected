@@ -53,7 +53,7 @@ struct IntroPage2: View {
     @EnvironmentObject private var introState: IntroState
     var body: some View {
         VStack {
-            ContactsView(contact_type: .weekly, selection: .constant(nil))
+            ContactsView(contact_type: .weekly)
                 .modelContainer(for: [Contact.self])
             
             Button(action: { introState.value = 3 }) {
@@ -74,7 +74,7 @@ struct IntroPage3: View {
     @EnvironmentObject private var introState: IntroState
     var body: some View {
         VStack {
-            ContactsView(contact_type: .monthly, selection: .constant(nil))
+            ContactsView(contact_type: .monthly)
                 .modelContainer(for: [Contact.self])
             
             Button(action: { introState.value = 4 }) {

@@ -13,7 +13,7 @@ struct ContactsView: View {
             SortDescriptor(\Contact.givenName, order: .forward)
         ]) private var contacts: [Contact]
     let contact_type: ContactType
-    @Binding var selection: String?
+    // @Binding var selection: String?
 
     @State private var alertMessage: AlertMessage?
     @State private var showingPicker = false
@@ -45,11 +45,7 @@ struct ContactsView: View {
                 } else {
                     ForEach(visibleContacts) { c in
                         // Use a NavigationLink as the row label directly (no hidden link)
-                        NavigationLink(
-                            destination: ContactDetailView(contact: c),
-                            tag: c.id,
-                            selection: $selection
-                        ) {
+                        NavigationLink(value: c.id) {
                             HStack (spacing: 12) {
                                 // order number (1-based)
                                 Text("\(c.order + 1)")

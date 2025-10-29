@@ -6,11 +6,20 @@ struct HomeView: View {
     @State private var selectedType: ContactType = .weekly
     @EnvironmentObject var appState: AppState
 
+    // Drive the NavigationStack programmatically
+    @State private var path = NavigationPath()
+
+    // Needed to resolve an id -> Contact for navigationDestination
+    @Query(sort: [
+        SortDescriptor(\Contact.order, order: .forward),
+        SortDescriptor(\Contact.givenName, order: .forward)
+    ]) private var contacts: [Contact]
+
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             ZStack {
-                // Show the ContactView for the selected type (no internal NavigationStack)
-                ContactsView(contact_type: selectedType, selection: $appState.selectedContactID)
+                // Contacts list (value-based navigation)
+                ContactsView(contact_type: selectedType)
 
                 // Bottom nav dock — hidden when a contact is selected (detail pushed)
                 if appState.selectedContactID == nil {
@@ -52,6 +61,26 @@ struct HomeView: View {
                 }
             }
             .padding(.bottom, safeAreaBottomPadding())
+
+            // Map a contact id (String) to the detail view
+            .navigationDestination(for: String.self) { id in
+                if let contact = contacts.first(where: { $0.identifier == id }) {
+                    ContactDetailView(contact: contact)
+                } else {
+                    Text("Contact not found")
+                }
+            }
+            // When the appState id changes (e.g. notification tapped), reset and push the id
+            .onChange(of: appState.selectedContactID) { id in
+                if let id = id {
+                    // Reset path so we override current detail stack, then push target id
+                    path = NavigationPath()
+                    path.append(id)
+                } else {
+                    // clear navigation when selection cleared
+                    path = NavigationPath()
+                }
+            }
         }
     }
 
