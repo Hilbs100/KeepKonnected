@@ -60,7 +60,7 @@ struct SearchableContactPicker: View {
                     }
                     .listStyle(.plain)
                     .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
-                    .onChange( of: searchText) { _ in filter() }
+                    .onChange(of: searchText) { _ in filter() }
                 }
             }
             .navigationTitle("Import Contacts")
