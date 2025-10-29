@@ -12,7 +12,7 @@ import UIKit
 @main
 struct KeepKonnectedApp: App {
     @StateObject private var introState = IntroState()
-    init () {
+    init() {
         UITableView.appearance().backgroundColor = .clear
     }
     
