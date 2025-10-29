@@ -7,13 +7,32 @@
 
 import SwiftUI
 import SwiftData
+import UIKit
 
 @main
 struct KeepKonnectedApp: App {
+    @StateObject private var introState = IntroState()
+    init() {
+        UITableView.appearance().backgroundColor = .clear
+    }
+    
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .modelContainer(for: [Contact.self])
+            Group {
+                if introState.value == 4 {
+                    // Main app
+                    HomeView()
+                        .modelContainer(for: [Contact.self])
+                } else {
+                    // Show the appropriate intro page(s)
+                    IntroRoot()
+                        .environmentObject(introState)
+                }
+            }
+//            .environmentObject(introState).onAppear {
+//                introState.enableIntro()
+//            }
         }
     }
 }
