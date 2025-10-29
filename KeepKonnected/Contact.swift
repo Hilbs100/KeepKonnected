@@ -52,7 +52,7 @@ final class Contact: Identifiable, Equatable {
         self.order = order
     }
     
-    func refresh () {
+    func refresh() {
         let contactStore = CNContactStore()
         
         let keysToFetch = [
