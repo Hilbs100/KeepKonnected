@@ -116,7 +116,7 @@ struct IntroRoot: View {
                     IntroPage3()
                 default:
                     // If value is 4 (or any other unexpected value), go to the main app; keep a placeholder
-                    HomeView() // fallback; in the App we switch to ContactView when value == 4
+                    HomeView() // fallback; in the App we switch to HomeView when value == 4
                         .modelContainer(for: [Contact.self])
                 }
             }
