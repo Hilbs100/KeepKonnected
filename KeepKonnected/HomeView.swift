@@ -81,6 +81,12 @@ struct HomeView: View {
                     path = NavigationPath()
                 }
             }
+            .onAppear {
+                // Check if we have initialized Contact Probabilities and Arrays, if not do so
+                if !Contact.didInitProbabilities {
+                    Contact.initProbabilities()
+                }
+            }
         }
     }
 

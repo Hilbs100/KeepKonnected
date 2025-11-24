@@ -17,6 +17,9 @@ enum ContactType: Int, Codable {
 
 @Model
 final class Contact: Identifiable, Equatable {
+    static var Weekdays: [Double]? = nil
+    static var WeekdayTimes: [[Double]]? = nil
+    static var didInitProbabilities: Bool = false
     // the CNContact.identifier is stable and we keep it so we can dedupe imports
     var identifier: String
     var givenName: String
@@ -32,6 +35,26 @@ final class Contact: Identifiable, Equatable {
     var displayName: String {
         let name = [givenName, familyName].filter { !$0.isEmpty }.joined(separator: " ")
         return name.isEmpty ? "No Name" : name
+    }
+    
+    static func initProbabilities() {
+        Weekdays = Array(repeating: 1.0, count: 7)
+        let numQuarterHours = 24 * 4
+        var normalWeekdayTime = [Double](repeating: 1.0, count: numQuarterHours)
+        normalWeekdayTime.replaceSubrange(0...35, with: [Double](repeating: 0.0, count: 36)) // disable midnight to 9am
+        normalWeekdayTime.replaceSubrange((21*4)..<numQuarterHours, with: [Double](repeating: 0.0, count: numQuarterHours-21*4))// disable 9pm to midnight
+        WeekdayTimes = Array(repeating: normalWeekdayTime, count: 7)
+        Weekdays = normalize(input: Weekdays!)
+        for i in 0..<7 {
+            WeekdayTimes![i] = normalize(input: WeekdayTimes![i])
+        }
+        didInitProbabilities = true
+    }
+    
+    static func normalize(input: [Double]) -> [Double] {
+        let total = input.reduce(0, +)
+        guard total > 0 else { return input }
+        return input.map { $0 / total }
     }
     
     init(identifier: String = UUID().uuidString,
@@ -80,6 +103,23 @@ final class Contact: Identifiable, Equatable {
     }
     
     func createNotification() {
+        
+        // Use Weekday and Time probabilities to schedule notification time
+        if !Contact.didInitProbabilities {
+            Contact.initProbabilities()
+        }
+        
+        // Sample from Weekdays:
+        let randNum = Double.random(in: 0..<1)
+        var cumulative = 0.0
+        var selectedDay = 0
+        for (i, prob) in Contact.Weekdays!.enumerated() {
+            cumulative += prob
+            if randNum < cumulative {
+                selectedDay = i
+                break
+            }
+        }
         print("Notification Started for contact \(self.displayName)")
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
                 if granted {
