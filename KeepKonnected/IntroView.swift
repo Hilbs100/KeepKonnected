@@ -3,6 +3,7 @@
 //  KeepKonnected
 //
 //  Created by Samuel Hilbert on 10/18/25.
+//  No AI was used for this
 //
 
 import SwiftUI

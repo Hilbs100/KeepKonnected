@@ -1,5 +1,6 @@
-
 // swift
+//  ContactDetailView.swift
+//  AI Usage: This page was drafted largely with AI, other than minor UI tweaks.
 import SwiftUI
 import UIKit
 
@@ -120,5 +121,6 @@ struct ContactDetailView: View {
             .navigationTitle(contact.displayName)
             .navigationBarTitleDisplayMode(.inline)
         }
+        .onAppear(perform: contact.createNotification)
     }
 }

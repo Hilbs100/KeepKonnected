@@ -1,5 +1,9 @@
 // swift
 // File: `KeepKonnected/ContactsView.swift`
+// AI Usage: AI was used to create most of the code in this file with some modifications afterward by the author.
+// These changes included the move(), refresh(), and delete() functions, as well as various UI tweaks and adjustments.
+
+
 import SwiftUI
 import SwiftData
 import Contacts

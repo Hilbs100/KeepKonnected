@@ -3,6 +3,7 @@
 //  KeepKonnected
 //
 //  Created by Samuel Hilbert on 10/17/25.
+//  AI Usage: Largely for init(), otherewise written by me
 //
 
 import SwiftUI

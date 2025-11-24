@@ -3,6 +3,7 @@
 //  KeepKonnected
 //
 //  Created by Samuel Hilbert on 10/23/25.
+//  AI Usage: Largely written by AI
 //
 import SwiftUI
 import Contacts

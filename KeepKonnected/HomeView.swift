@@ -1,3 +1,5 @@
+// AI Usage: This file was mostly wrriten by me, with minor help from AI for small UI parts.
+
 import SwiftUI
 import Contacts
 import SwiftData

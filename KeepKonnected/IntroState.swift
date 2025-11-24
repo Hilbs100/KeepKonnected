@@ -1,3 +1,4 @@
+// This file was written largely by me without AI assistance.
 import Foundation
 import Combine
 
