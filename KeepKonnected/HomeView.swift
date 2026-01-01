@@ -7,6 +7,8 @@ import SwiftData
 struct HomeView: View {
     @State private var selectedType: ContactType = .weekly
     @EnvironmentObject var appState: AppState
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.scenePhase) private var scenePhase
 
     // Drive the NavigationStack programmatically
     @State private var path = NavigationPath()
@@ -22,6 +24,9 @@ struct HomeView: View {
             ZStack {
                 // Contacts list (value-based navigation)
                 ContactsView(contact_type: selectedType)
+                    .onChange(of: scenePhase) { newPhase, oldPhase in
+                        Contact.weeklyNotifications(contacts: contacts)
+                    }
 
                 // Bottom nav dock — hidden when a contact is selected (detail pushed)
                 if appState.selectedContactID == nil {

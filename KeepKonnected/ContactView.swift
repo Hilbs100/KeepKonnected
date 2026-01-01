@@ -86,6 +86,12 @@ struct ContactDetailView: View {
                             }
                         }
                     }
+                    if contact.notifDate > Date() {
+                        Divider()
+                        Text("Upcoming Reminder").font(.headline)
+                        Text(contact.getNotifDate())
+                            .foregroundStyle(.primary)
+                    }
                 }
                 .padding()
                 .frame(maxWidth: .infinity)
@@ -121,6 +127,6 @@ struct ContactDetailView: View {
             .navigationTitle(contact.displayName)
             .navigationBarTitleDisplayMode(.inline)
         }
-        .onAppear(perform: contact.createNotification)
+        // .onAppear(perform: contact.createNotification)
     }
 }

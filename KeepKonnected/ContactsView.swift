@@ -17,7 +17,6 @@ struct ContactsView: View {
             SortDescriptor(\Contact.givenName, order: .forward)
         ]) private var contacts: [Contact]
     let contact_type: ContactType
-    // @Binding var selection: String?
 
     @State private var alertMessage: AlertMessage?
     @State private var showingPicker = false

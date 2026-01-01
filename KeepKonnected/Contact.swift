@@ -1,7 +1,4 @@
 //
-//  Item.swift
-//  KeepKonnected
-//
 //  Created by Samuel Hilbert on 10/17/25.
 //  Minimal AI was used to create the constructor and basic variables in this file.
 //
@@ -10,6 +7,7 @@ import Foundation
 import SwiftData
 import Contacts
 import UserNotifications
+import EventKit
 
 enum ContactType: Int, Codable {
     case weekly = 0
@@ -59,6 +57,76 @@ final class Contact: Identifiable, Equatable {
         return input.map { $0 / total }
     }
     
+    /// Filters WeekdayTimes using calendar events to mark busy intervals as zero probability, then normalizes each day.
+    /// - Parameter completion: Closure called with the filtered and normalized WeekdayTimes arrays.
+    static func filteredWeekdayTimesWithCalendar(completion: (() -> Void)? = nil) {
+        let store = EKEventStore()
+        store.requestFullAccessToEvents() { granted, error in
+            guard granted, error == nil else {
+                // If access is denied or error, return original WeekdayTimes or empty default
+                print("Error: " + (error?.localizedDescription ?? "Access to calendar events denied"))
+                completion!()
+                return
+            }
+            let calendar = Calendar.current
+            let now = Date()
+            // Find the start of the current week, Sunday = weekday 1 in Gregorian calendar by default
+            let weekStart = calendar.startOfDay(for: calendar.date(bySetting: .weekday, value: 1, of: now) ?? now)
+            var filtered = WeekdayTimes ?? Array(repeating: Array(repeating: 1.0, count: 96), count: 7)
+            
+            for weekday in 0..<7 {
+                let dayStart = calendar.date(byAdding: .day, value: weekday, to: weekStart)!
+                let dayEnd = calendar.date(byAdding: .day, value: 1, to: dayStart)!
+                let predicate = store.predicateForEvents(withStart: dayStart, end: dayEnd, calendars: nil)
+                let events = store.events(matching: predicate).filter { !$0.isAllDay && $0.availability == .busy }
+                
+                // Iterate over each 15-minute interval
+                for interval in 0..<96 {
+                    let intervalStart = calendar.date(byAdding: .minute, value: interval * 15, to: dayStart)!
+                    let intervalEnd = calendar.date(byAdding: .minute, value: (interval+1) * 15, to: dayStart)!
+                    // Check if interval overlaps any event
+                    let busy = events.contains { event in
+                        event.startDate < intervalEnd && event.endDate > intervalStart
+                    }
+                    if busy {
+                        filtered[weekday][interval] = 0.0
+                    }
+                }
+                // Normalize after marking busy intervals
+                filtered[weekday] = Contact.normalize(input: filtered[weekday])
+            }
+            Contact.WeekdayTimes = filtered
+            completion!()
+        }
+    }
+    
+    static func weeklyNotifications(contacts: [Contact] = []) {
+        if !Contact.didInitProbabilities {
+            Contact.initProbabilities()
+        }
+        
+        // Create copy of contact probabilities for weekdays
+        let temp_weekdays = Contact.Weekdays.map { $0 }!
+        let temp_weekday_times = Contact.WeekdayTimes!.map { $0.map { $0 } }
+        
+        // Instead of directly copying WeekdayTimes, filter it based on calendar events asynchronously
+        filteredWeekdayTimesWithCalendar() {
+            let calendar = Calendar.current
+            let now = Date()
+            
+            // Find the start of the current week, Sunday = weekday 1 in Gregorian calendar by default
+            let weekStart = calendar.startOfDay(for: calendar.date(bySetting: .weekday, value: 1, of: now) ?? now)
+            
+            for contact in contacts.filter({ $0.contact_type == .weekly }){
+                contact.createNotification(now: weekStart)
+            }
+            
+            // Restore probabilities
+            Contact.Weekdays = temp_weekdays
+            Contact.WeekdayTimes = temp_weekday_times
+        }
+    }
+    
     init(identifier: String = UUID().uuidString,
          givenName: String = "",
          familyName: String = "",
@@ -104,7 +172,22 @@ final class Contact: Identifiable, Equatable {
         
     }
     
-    func createNotification() {
+    func getNotifDate() -> String {
+        let formatter = DateFormatter()
+
+        // 3. Set the desired date format (using UTS Unicode Technical Standard patterns)
+        formatter.dateFormat = "MMM dd yyyy @ h:mm a"
+
+        // Optional: Set the locale for consistent formatting, especially with fixed formats
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+
+        // 4. Convert the Date to a String
+        let dateString = formatter.string(from: self.notifDate)
+        
+        return dateString
+    }
+    
+    func createNotification(now: Date = Date()) {
         let dateFormatter = DateFormatter()
         dateFormatter.timeZone = TimeZone.current
         dateFormatter.locale = Locale.current
@@ -125,26 +208,44 @@ final class Contact: Identifiable, Equatable {
             return
         }
         
-        // Sample from Weekdays:
-        let randNum = Double.random(in: 0..<1)
-        var cumulative = 0.0
         var selectedDay = 0
-        for (i, prob) in Contact.Weekdays!.enumerated() {
-            cumulative += prob
-            if randNum < cumulative {
-                selectedDay = i
-                break
+        var selectedTime = 0
+        
+        // Sample from Weekdays:
+        var remAttempts = 15
+        while remAttempts > 0 {
+            remAttempts -= 1
+            let randNum = Double.random(in: 0.000001..<1)
+            var cumulative = 0.0
+            selectedDay = 0
+            for (i, prob) in Contact.Weekdays!.enumerated() {
+                cumulative += prob
+                if randNum < cumulative {
+                    selectedDay = i
+                    break
+                }
+            }
+            if Contact.WeekdayTimes![selectedDay].reduce(0, +) < 0.5 {
+                Contact.Weekdays![selectedDay] = 0.0
+                Contact.Weekdays = Contact.normalize(input: Contact.Weekdays!)
+                continue
+            }
+            
+            let randNumTime = Double.random(in: 0..<1)
+            cumulative = 0.0
+            selectedTime = 0
+            for (i, prob) in Contact.WeekdayTimes![selectedDay].enumerated() {
+                cumulative += prob
+                if randNumTime < cumulative {
+                    selectedTime = i
+                    break
+                }
             }
         }
-        let randNumTime = Double.random(in: 0..<1)
-        cumulative = 0.0
-        var selectedTime = 0
-        for (i, prob) in Contact.WeekdayTimes![selectedDay].enumerated() {
-            cumulative += prob
-            if randNumTime < cumulative {
-                selectedTime = i
-                break
-            }
+        
+        if remAttempts == 0 {
+            print("Failed to select a valid notification time for contact \(self.displayName) after multiple attempts.")
+            return
         }
         
         
@@ -163,7 +264,7 @@ final class Contact: Identifiable, Equatable {
         dateComponents.weekday = selectedDay + 1 // Sunday = 1, Saturday = 7
                 
         guard let nextDate = Calendar.current.nextDate(
-            after: Date(),
+            after: now,
             matching: dateComponents,
             matchingPolicy: .nextTime, // Finds the next exact match
         ) else {
@@ -190,6 +291,12 @@ final class Contact: Identifiable, Equatable {
                 print("Error scheduling notification: \(error.localizedDescription)")
             }
         }
+        
+        // Modify temporary probabilities to avoid scheduling too close next time
+        Contact.Weekdays![selectedDay] *= 0.5
+        Contact.WeekdayTimes![selectedDay][max(0, selectedTime-3) ... min(selectedTime + 3, 95)] = Array.SubSequence(repeating: 0.0, count: min(selectedTime + 3, 95) - max(0, selectedTime-3) + 1)
+        Contact.Weekdays = Contact.normalize(input: Contact.Weekdays!)
+        Contact.WeekdayTimes![selectedDay] = Contact.normalize(input: Contact.WeekdayTimes![selectedDay])
     }
     
     static func == (lhs: Contact, rhs: Contact) -> Bool {
