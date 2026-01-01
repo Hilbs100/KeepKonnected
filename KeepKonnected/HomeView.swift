@@ -78,7 +78,7 @@ struct HomeView: View {
                 }
             }
             // When the appState id changes (e.g. notification tapped), reset and push the id
-            .onChange(of: appState.selectedContactID) { id in
+            .onChange(of: appState.selectedContactID) { id, old_id in
                 if let id = id {
                     // Reset path so we override current detail stack, then push target id
                     path = NavigationPath()
@@ -89,6 +89,8 @@ struct HomeView: View {
                 }
             }
             .onAppear {
+                NotificationScheduler.setModelContext(modelContext)
+                NotificationScheduler.scheduleBackgroundTask()
                 // Check if we have initialized Contact Probabilities and Arrays, if not do so
                 if !Contact.didInitProbabilities {
                     Contact.initProbabilities()

@@ -19,6 +19,7 @@ final class Contact: Identifiable, Equatable {
     static var Weekdays: [Double]? = nil
     static var WeekdayTimes: [[Double]]? = nil
     static var didInitProbabilities: Bool = false
+    static var lastMassNotifUpdate: Date = Date().addingTimeInterval(-100000000)
     // the CNContact.identifier is stable and we keep it so we can dedupe imports
     var identifier: String
     var givenName: String
@@ -116,9 +117,12 @@ final class Contact: Identifiable, Equatable {
             
             // Find the start of the current week, Sunday = weekday 1 in Gregorian calendar by default
             let weekStart = calendar.startOfDay(for: calendar.date(bySetting: .weekday, value: 1, of: now) ?? now)
-            
-            for contact in contacts.filter({ $0.contact_type == .weekly }){
-                contact.createNotification(now: weekStart)
+                        
+            if Contact.lastMassNotifUpdate < Date().addingTimeInterval(-TimeInterval(DAY_3)) {
+                for contact in contacts {
+                    contact.createNotification(now: weekStart)
+                }
+                Contact.lastMassNotifUpdate = Date()
             }
             
             // Restore probabilities
@@ -200,7 +204,6 @@ final class Contact: Identifiable, Equatable {
         }
         
         print("Current Notif Date: \(dateFormatter.string(from: notifDate)) for contact \(self.displayName)")
-        print("Current Date is: \(dateFormatter.string(from: Date()))")
         
         if notifDate > Date().addingTimeInterval(60 * 30) { // 30 minute buffer
             // Date has not yet passed, skip scheduling
@@ -208,6 +211,21 @@ final class Contact: Identifiable, Equatable {
             return
         }
         
+        if self.contact_type == .monthly {
+            let sinceNotif = Date().timeIntervalSince(self.notifDate)
+            var chance = 0.0
+            if sinceNotif < Double(DAY_7) {
+                chance = 0.0
+            }
+            else {
+                chance = Double(sinceNotif) / Double(DAY_7 * 5) // max chance after 5 weeks
+            }
+            if Double.random(in: 0..<1) > chance {
+                print("Skipping monthly notification scheduling for contact \(self.displayName) based on probability.")
+                return
+            }
+        }
+            
         var selectedDay = 0
         var selectedTime = 0
         
@@ -225,7 +243,7 @@ final class Contact: Identifiable, Equatable {
                     break
                 }
             }
-            if Contact.WeekdayTimes![selectedDay].reduce(0, +) < 0.5 {
+            if Contact.WeekdayTimes![selectedDay].reduce(0, +) < 0.9 {
                 Contact.Weekdays![selectedDay] = 0.0
                 Contact.Weekdays = Contact.normalize(input: Contact.Weekdays!)
                 continue
@@ -241,6 +259,7 @@ final class Contact: Identifiable, Equatable {
                     break
                 }
             }
+            break
         }
         
         if remAttempts == 0 {

@@ -8,6 +8,8 @@
 
 import SwiftUI
 import SwiftData
+import BackgroundTasks
+import OSLog
 import UIKit
 import UserNotifications
 
@@ -23,6 +25,7 @@ struct KeepKonnectedApp: App {
     private let notificationHandler: NotificationHandler
 
     init() {
+        let logger = Logger(subsystem: "KeepKonnected", category: "Background")
         UITableView.appearance().backgroundColor = .clear
         let appStateInstance = AppState()
         
@@ -33,6 +36,12 @@ struct KeepKonnectedApp: App {
         let handler = NotificationHandler(appState: appStateInstance)
         self.notificationHandler = handler
         UNUserNotificationCenter.current().delegate = handler
+        
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: "com.samuelhilbert.KeepKonnected.refresh", using: nil)
+        { task in
+            logger.log("Handling background task")
+            NotificationScheduler.handleAppRefresh(task: task as! BGAppRefreshTask)
+        }
     }
     
 

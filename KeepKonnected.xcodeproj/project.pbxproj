@@ -29,9 +29,22 @@
 		7DD97B962EA343940097CAF0 /* KeepKonnectedUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KeepKonnectedUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		7DA0287F2F06184D00D813B8 /* Exceptions for "KeepKonnected" folder in "KeepKonnected" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 7DD97B7C2EA343930097CAF0 /* KeepKonnected */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		7DD97B7F2EA343930097CAF0 /* KeepKonnected */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				7DA0287F2F06184D00D813B8 /* Exceptions for "KeepKonnected" folder in "KeepKonnected" target */,
+			);
 			path = KeepKonnected;
 			sourceTree = "<group>";
 		};
@@ -400,7 +413,8 @@
 				DEVELOPMENT_TEAM = A699XX42ST;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "";
+				INFOPLIST_FILE = KeepKonnected/Info.plist;
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "We use your Calendar to optimize alerts for when you aren't busy and are more likely to pick up the phone.";
 				INFOPLIST_KEY_NSContactsUsageDescription = "We use your Contacts to send you alerts when you should catch up with your friends and family.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -434,7 +448,8 @@
 				DEVELOPMENT_TEAM = A699XX42ST;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "";
+				INFOPLIST_FILE = KeepKonnected/Info.plist;
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "We use your Calendar to optimize alerts for when you aren't busy and are more likely to pick up the phone.";
 				INFOPLIST_KEY_NSContactsUsageDescription = "We use your Contacts to send you alerts when you should catch up with your friends and family.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
