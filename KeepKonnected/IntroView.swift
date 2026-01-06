@@ -13,6 +13,7 @@ import SwiftData
 
 struct IntroPage1: View {
     @EnvironmentObject private var introState: IntroState
+    
     var body: some View {
         VStack {
             
@@ -55,7 +56,6 @@ struct IntroPage2: View {
     var body: some View {
         VStack {
             ContactsView(contact_type: .weekly)
-                .modelContainer(for: [Contact.self])
             
             Button(action: { introState.value = 3 }) {
                 Text("Next")
@@ -76,7 +76,6 @@ struct IntroPage3: View {
     var body: some View {
         VStack {
             ContactsView(contact_type: .monthly)
-                .modelContainer(for: [Contact.self])
             
             Button(action: { introState.value = 4 }) {
                 Text("Finished")
@@ -95,6 +94,8 @@ struct IntroPage3: View {
 // Root view that shows the appropriate intro page based on IntroState
 struct IntroRoot: View {
     @EnvironmentObject private var introState: IntroState
+    @EnvironmentObject private var appState: AppState
+    
     var body: some View {
         if (introState.value > 0 && introState.value < 4) {
             
@@ -121,8 +122,7 @@ struct IntroRoot: View {
                 default:
                     // If value is 4 (or any other unexpected value), go to the main app; keep a placeholder
                     HomeView() // fallback; in the App we switch to HomeView when value == 4
-                        .environmentObject(AppState())
-                        .modelContainer(for: [Contact.self])
+                        .environmentObject(appState)
                 }
             }
         }

@@ -59,6 +59,8 @@ struct KeepKonnectedApp: App {
                     // Show the appropriate intro page(s)
                     IntroRoot()
                         .environmentObject(introState)
+                        .environmentObject(appState)
+                        .modelContainer(for: [Contact.self])
                 }
             }
 //            .environmentObject(introState).onAppear {

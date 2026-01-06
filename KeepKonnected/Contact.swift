@@ -78,8 +78,10 @@ final class Contact: Identifiable, Equatable {
     private static let sunday = 0
     private static let saturday = 6
     private static let numDays = 7
-    private static let startOfDay  = 0
-    private static let endOfDay    = 95
+    private static let startOfDay = 0
+    private static let endOfDay = 95
+    private static let day = 86400 // seconds in a day
+    private static let week = day * 7
     private static let quarterHours = 4 // quarter hours in an hour
     private static let quarterMins  = 15 // Minutes in a quarter hour
     private static let numQuarterHours = 96 // Number of quarter hours (24 * 4)
@@ -200,7 +202,7 @@ final class Contact: Identifiable, Equatable {
             // Find the start of the current week, Sunday = weekday 1 in Gregorian calendar by default
             let weekStart = calendar.startOfDay(for: calendar.date(bySetting: .weekday, value: 1, of: now) ?? now)
             
-            if Contact.lastMassNotifUpdate < Date().addingTimeInterval(-TimeInterval(DAY_3)) {
+            if Contact.lastMassNotifUpdate < Date().addingTimeInterval(-TimeInterval(day * 3)) {
                 for contact in contacts {
                     contact.createNotification(now: weekStart, inBatch: true)
                 }
@@ -296,11 +298,11 @@ final class Contact: Identifiable, Equatable {
         if self.contact_type == .monthly {
             let sinceNotif = Date().timeIntervalSince(self.notifDate)
             var chance = 0.0
-            if sinceNotif < Double(DAY_7) {
+            if sinceNotif < Double(Contact.week) {
                 chance = 0.0
             }
             else {
-                chance = Double(sinceNotif) / Double(DAY_7 * 5) // max chance after 5 weeks
+                chance = Double(sinceNotif) / Double(Contact.week * 5) // max chance after 5 weeks
             }
             if Double.random(in: 0..<1) > chance {
                 print("Skipping monthly notification scheduling for contact \(self.displayName) based on probability.")

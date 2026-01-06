@@ -9,25 +9,27 @@ struct HomeView: View {
     @EnvironmentObject var appState: AppState
     @Environment(\.modelContext) private var modelContext
     @Environment(\.scenePhase) private var scenePhase
-
+    
     // Drive the NavigationStack programmatically
     @State private var path = NavigationPath()
-
+    
     // Needed to resolve an id -> Contact for navigationDestination
     @Query(sort: [
         SortDescriptor(\Contact.order, order: .forward),
         SortDescriptor(\Contact.givenName, order: .forward)
     ]) private var contacts: [Contact]
-
+    
     var body: some View {
         NavigationStack(path: $path) {
             ZStack {
                 // Contacts list (value-based navigation)
                 ContactsView(contact_type: selectedType)
-                    .onChange(of: scenePhase) {
-                        Contact.weeklyNotifications(contacts: contacts)
+                    .onChange(of: scenePhase) { _, newPhase in
+                        if newPhase == .active {
+                            Contact.weeklyNotifications(contacts: contacts)
+                        }
                     }
-
+                
                 // Bottom nav dock — hidden when a contact is selected (detail pushed)
                 if appState.selectedContactID == nil {
                     VStack {
@@ -46,7 +48,7 @@ struct HomeView: View {
                                 .foregroundColor(selectedType == .weekly ? .accentColor : .secondary)
                             }
                             .accessibilityLabel("Weekly contacts")
-
+                            
                             // Monthly button
                             Button(action: { selectedType = .monthly }) {
                                 VStack(spacing: 6) {
@@ -68,7 +70,7 @@ struct HomeView: View {
                 }
             }
             .padding(.bottom, safeAreaBottomPadding())
-
+            
             // Map a contact id (String) to the detail view
             .navigationDestination(for: String.self) { id in
                 if let contact = contacts.first(where: { $0.identifier == id }) {
@@ -98,14 +100,14 @@ struct HomeView: View {
             }
         }
     }
-
+    
     // Helper to respect safe area on devices with home indicator
     private func safeAreaBottomPadding() -> CGFloat {
         let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
         let window = scenes
             .flatMap { $0.windows }
             .first(where: { $0.isKeyWindow }) ?? scenes.first?.windows.first
-
+        
         let inset = window?.safeAreaInsets.bottom ?? 0
         return max(inset, 32)
     }

@@ -83,7 +83,9 @@ struct ContactsView: View {
                     }
                     .onMove(perform: move)
                     .onDelete(perform: delete)
-                    .onAppear(perform: refreshContacts)
+                    .onAppear {
+                        Task { await refreshContacts() }
+                    }
                 }
             }
             .scrollContentBackground(.hidden)
@@ -143,6 +145,8 @@ struct ContactsView: View {
                                   order: nextOrder)
             nextOrder += 1
             
+            contact.createNotification()
+            
             modelContext.insert(contact)
             imported += 1
         }
@@ -156,11 +160,12 @@ struct ContactsView: View {
         }
     }
     
-    private func refreshContacts() {
+    private func refreshContacts() async {
         for contact in contacts {
             contact.refresh()
         }
         do {
+            try? await Task.sleep(for: .milliseconds(300)) // allow time for refresh
             try modelContext.save()
         } catch {
             print("Failed to refresh contacts: \(error)")
