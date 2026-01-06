@@ -16,10 +16,53 @@ enum ContactType: Int, Codable {
 
 @Model
 final class Contact: Identifiable, Equatable {
-    static var Weekdays: [Double]? = nil
-    static var WeekdayTimes: [[Double]]? = nil
-    static var didInitProbabilities: Bool = false
-    static var lastMassNotifUpdate: Date = Date().addingTimeInterval(-100000000)
+    
+    // Serial queue to synchronize access to shared static state
+    private static let probabilityQueue = DispatchQueue(label: "KeepKonnected.Contact.probabilityQueue")
+    
+    // Backing stored properties for thread-safe static state
+    private static var _Weekdays: [Double]? = nil
+    private static var _WeekdayTimes: [[Double]]? = nil
+    private static var _didInitProbabilities: Bool = false
+    private static var _lastMassNotifUpdate: Date = Date().addingTimeInterval(-100000000)
+    
+    // Public thread-safe accessors preserving existing API
+    static var Weekdays: [Double]? {
+        get {
+            return probabilityQueue.sync { _Weekdays }
+        }
+        set {
+            probabilityQueue.sync { _Weekdays = newValue }
+        }
+    }
+    
+    static var WeekdayTimes: [[Double]]? {
+        get {
+            return probabilityQueue.sync { _WeekdayTimes }
+        }
+        set {
+            probabilityQueue.sync { _WeekdayTimes = newValue }
+        }
+    }
+    
+    static var didInitProbabilities: Bool {
+        get {
+            return probabilityQueue.sync { _didInitProbabilities }
+        }
+        set {
+            probabilityQueue.sync { _didInitProbabilities = newValue }
+        }
+    }
+    
+    static var lastMassNotifUpdate: Date {
+        get {
+            return probabilityQueue.sync { _lastMassNotifUpdate }
+        }
+        set {
+            probabilityQueue.sync { _lastMassNotifUpdate = newValue }
+        }
+    }
+    
     // the CNContact.identifier is stable and we keep it so we can dedupe imports
     var identifier: String
     var givenName: String

@@ -40,26 +40,24 @@ struct NotificationScheduler {
     
     static func performWeeklyNotifications(completion: @escaping (Bool) -> Void) {
         logger.log("NotificationScheduler: performWeeklyNotifications started.")
-        DispatchQueue.global().async {
-            guard let context = NotificationScheduler.modelContext else {
-                NotificationScheduler.logger.log("No ModelContext available for background work.")
-                completion(false)
-                return
-            }
-            
-            do {
-                let contacts = try context.fetch(FetchDescriptor<Contact>())
-                // Pass the fetched contacts into the Contact scheduling logic
-                NotificationScheduler.logger.log("NotificationScheduler: fetched \(contacts.count) contacts.")
-                Contact.weeklyNotifications(contacts: contacts)
-                
-                // Persist any updates made to contacts (e.g. notifDate changes)
-                try context.save()
-                completion(true)
-            } catch {
-                logger.log("KeepKonnectedBGHandler: error fetching or saving contacts: \(error)")
-                completion(false)
-            }
+        guard let context = NotificationScheduler.modelContext else {
+            NotificationScheduler.logger.log("No ModelContext available for background work.")
+            completion(false)
+            return
+        }
+
+        do {
+            let contacts = try context.fetch(FetchDescriptor<Contact>())
+            // Pass the fetched contacts into the Contact scheduling logic
+            NotificationScheduler.logger.log("NotificationScheduler: fetched \(contacts.count) contacts.")
+            Contact.weeklyNotifications(contacts: contacts)
+
+            // Persist any updates made to contacts (e.g. notifDate changes)
+            try context.save()
+            completion(true)
+        } catch {
+            logger.log("KeepKonnectedBGHandler: error fetching or saving contacts: \(error)")
+            completion(false)
         }
     }
     

@@ -18,10 +18,7 @@ struct KeepKonnectedApp: App {
     @StateObject private var introState = IntroState()
     @StateObject private var appState = AppState()
     
-    @Query(sort: [
-        SortDescriptor(\Contact.order, order: .forward),
-        SortDescriptor(\Contact.givenName, order: .forward)
-    ]) private var contacts: [Contact]
+
     private let notificationHandler: NotificationHandler
 
     init() {
