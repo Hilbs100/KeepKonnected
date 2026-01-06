@@ -1,19 +1,37 @@
+// AI Usage: This file was mostly written by me, with minor help from AI for small UI parts.
+
 import SwiftUI
 import Contacts
 import SwiftData
 
 struct HomeView: View {
     @State private var selectedType: ContactType = .weekly
-    @State private var selectedContactID: String? = nil
-
+    @EnvironmentObject var appState: AppState
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.scenePhase) private var scenePhase
+    
+    // Drive the NavigationStack programmatically
+    @State private var path = NavigationPath()
+    
+    // Needed to resolve an id -> Contact for navigationDestination
+    @Query(sort: [
+        SortDescriptor(\Contact.order, order: .forward),
+        SortDescriptor(\Contact.givenName, order: .forward)
+    ]) private var contacts: [Contact]
+    
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             ZStack {
-                // Show the ContactView for the selected type (no internal NavigationStack)
-                ContactsView(contact_type: selectedType, selection: $selectedContactID)
-
+                // Contacts list (value-based navigation)
+                ContactsView(contact_type: selectedType)
+                    .onChange(of: scenePhase) { _, newPhase in
+                        if newPhase == .active {
+                            Contact.weeklyNotifications(contacts: contacts)
+                        }
+                    }
+                
                 // Bottom nav dock — hidden when a contact is selected (detail pushed)
-                if selectedContactID == nil {
+                if appState.selectedContactID == nil {
                     VStack {
                         Spacer()
                         HStack(spacing: 100) {
@@ -30,7 +48,7 @@ struct HomeView: View {
                                 .foregroundColor(selectedType == .weekly ? .accentColor : .secondary)
                             }
                             .accessibilityLabel("Weekly contacts")
-
+                            
                             // Monthly button
                             Button(action: { selectedType = .monthly }) {
                                 VStack(spacing: 6) {
@@ -52,16 +70,44 @@ struct HomeView: View {
                 }
             }
             .padding(.bottom, safeAreaBottomPadding())
+            
+            // Map a contact id (String) to the detail view
+            .navigationDestination(for: String.self) { id in
+                if let contact = contacts.first(where: { $0.identifier == id }) {
+                    ContactDetailView(contact: contact)
+                } else {
+                    Text("Contact not found")
+                }
+            }
+            // When the appState id changes (e.g. notification tapped), reset and push the id
+            .onChange(of: appState.selectedContactID) { _, id in
+                if let id = id {
+                    // Reset path so we override current detail stack, then push target id
+                    path = NavigationPath()
+                    path.append(id)
+                } else {
+                    // clear navigation when selection cleared
+                    path = NavigationPath()
+                }
+            }
+            .onAppear {
+                NotificationScheduler.setModelContext(modelContext)
+                NotificationScheduler.scheduleBackgroundTask()
+                // Check if we have initialized Contact Probabilities and Arrays, if not do so
+                if !Contact.didInitProbabilities {
+                    Contact.initProbabilities()
+                }
+            }
         }
     }
-
+    
     // Helper to respect safe area on devices with home indicator
     private func safeAreaBottomPadding() -> CGFloat {
         let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
         let window = scenes
             .flatMap { $0.windows }
             .first(where: { $0.isKeyWindow }) ?? scenes.first?.windows.first
-
+        
         let inset = window?.safeAreaInsets.bottom ?? 0
         return max(inset, 32)
     }
@@ -69,5 +115,6 @@ struct HomeView: View {
 
 #Preview("HomeView") {
     HomeView()
+        .environmentObject(AppState())
         .modelContainer(for: [Contact.self])
 }

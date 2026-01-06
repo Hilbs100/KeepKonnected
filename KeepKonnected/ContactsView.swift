@@ -1,5 +1,9 @@
 // swift
 // File: `KeepKonnected/ContactsView.swift`
+// AI Usage: AI was used to create most of the code in this file with some modifications afterward by the author.
+// These changes included the move(), refresh(), and delete() functions, as well as various UI tweaks and adjustments.
+
+
 import SwiftUI
 import SwiftData
 import Contacts
@@ -13,7 +17,6 @@ struct ContactsView: View {
             SortDescriptor(\Contact.givenName, order: .forward)
         ]) private var contacts: [Contact]
     let contact_type: ContactType
-    @Binding var selection: String?
 
     @State private var alertMessage: AlertMessage?
     @State private var showingPicker = false
@@ -35,10 +38,7 @@ struct ContactsView: View {
     }
 
     var body: some View {
-        ZStack {
-            Color("IntroBackground")
-                .ignoresSafeArea()
-            
+        ZStack {            
             List {
                 let visibleContacts = contacts.filter { $0.contact_type == contact_type }
                 
@@ -48,11 +48,7 @@ struct ContactsView: View {
                 } else {
                     ForEach(visibleContacts) { c in
                         // Use a NavigationLink as the row label directly (no hidden link)
-                        NavigationLink(
-                            destination: ContactDetailView(contact: c),
-                            tag: c.id,
-                            selection: $selection
-                        ) {
+                        NavigationLink(value: c.identifier) {
                             HStack (spacing: 12) {
                                 // order number (1-based)
                                 Text("\(c.order + 1)")
@@ -87,7 +83,9 @@ struct ContactsView: View {
                     }
                     .onMove(perform: move)
                     .onDelete(perform: delete)
-                    .onAppear(perform: refreshContacts)
+                    .onAppear {
+                        Task { await refreshContacts() }
+                    }
                 }
             }
             .scrollContentBackground(.hidden)
@@ -111,14 +109,6 @@ struct ContactsView: View {
         }
         .alert(item: $alertMessage) { msg in
             Alert(title: Text("Import"), message: Text(msg.message), dismissButton: .default(Text("OK")))
-        }
-        // navigation destination resolves the contact id to the actual Contact object
-        .navigationDestination(for: String.self) { id in
-            if let contact = contacts.first(where: { $0.id == id }) {
-                ContactDetailView(contact: contact)
-            } else {
-                EmptyView()
-            }
         }
         
     }
@@ -155,6 +145,8 @@ struct ContactsView: View {
                                   order: nextOrder)
             nextOrder += 1
             
+            contact.createNotification()
+            
             modelContext.insert(contact)
             imported += 1
         }
@@ -168,11 +160,12 @@ struct ContactsView: View {
         }
     }
     
-    private func refreshContacts() {
+    private func refreshContacts() async {
         for contact in contacts {
             contact.refresh()
         }
         do {
+            try? await Task.sleep(for: .milliseconds(300)) // allow time for refresh
             try modelContext.save()
         } catch {
             print("Failed to refresh contacts: \(error)")
@@ -294,3 +287,4 @@ struct ContactsView: View {
 //        .modelContainer(for: Contact.self)
 //        .preferredColorScheme(.dark)
 //}
+

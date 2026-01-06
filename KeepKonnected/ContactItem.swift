@@ -3,6 +3,7 @@
 //  KeepKonnected
 //
 //  Created by Samuel Hilbert on 10/23/25.
+//  No AI was used for this
 //
 
 import Contacts

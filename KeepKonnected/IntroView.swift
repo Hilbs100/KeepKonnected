@@ -3,6 +3,7 @@
 //  KeepKonnected
 //
 //  Created by Samuel Hilbert on 10/18/25.
+//  No AI was used for this
 //
 
 import SwiftUI
@@ -12,6 +13,7 @@ import SwiftData
 
 struct IntroPage1: View {
     @EnvironmentObject private var introState: IntroState
+    
     var body: some View {
         VStack {
             
@@ -53,8 +55,7 @@ struct IntroPage2: View {
     @EnvironmentObject private var introState: IntroState
     var body: some View {
         VStack {
-            ContactsView(contact_type: .weekly, selection: .constant(nil))
-                .modelContainer(for: [Contact.self])
+            ContactsView(contact_type: .weekly)
             
             Button(action: { introState.value = 3 }) {
                 Text("Next")
@@ -74,8 +75,7 @@ struct IntroPage3: View {
     @EnvironmentObject private var introState: IntroState
     var body: some View {
         VStack {
-            ContactsView(contact_type: .monthly, selection: .constant(nil))
-                .modelContainer(for: [Contact.self])
+            ContactsView(contact_type: .monthly)
             
             Button(action: { introState.value = 4 }) {
                 Text("Finished")
@@ -94,17 +94,22 @@ struct IntroPage3: View {
 // Root view that shows the appropriate intro page based on IntroState
 struct IntroRoot: View {
     @EnvironmentObject private var introState: IntroState
+    @EnvironmentObject private var appState: AppState
+    
     var body: some View {
-        VStack(alignment: .leading) {
-            Text("Welcome to KeepKonnected")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .frame(maxWidth: .infinity, alignment: .center)
-                .multilineTextAlignment(.center)
-                .lineLimit(nil) // Allow unlimited lines
-                .fixedSize(horizontal: false, vertical: true) // Allow vertical expansion
+        if (introState.value > 0 && introState.value < 4) {
+            
+            VStack(alignment: .leading) {
+                Text("Welcome to KeepKonnected")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(nil) // Allow unlimited lines
+                    .fixedSize(horizontal: false, vertical: true) // Allow vertical expansion
+            }
+            .padding(.top, 40)
         }
-        .padding(.top, 40)
         NavigationView {
             Group {
                 switch introState.value {
@@ -117,7 +122,7 @@ struct IntroRoot: View {
                 default:
                     // If value is 4 (or any other unexpected value), go to the main app; keep a placeholder
                     HomeView() // fallback; in the App we switch to HomeView when value == 4
-                        .modelContainer(for: [Contact.self])
+                        .environmentObject(appState)
                 }
             }
         }

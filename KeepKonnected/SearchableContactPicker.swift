@@ -3,6 +3,7 @@
 //  KeepKonnected
 //
 //  Created by Samuel Hilbert on 10/23/25.
+//  AI Usage: Largely written by AI
 //
 import SwiftUI
 import Contacts
@@ -60,7 +61,7 @@ struct SearchableContactPicker: View {
                     }
                     .listStyle(.plain)
                     .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
-                    .onChange(of: searchText) { _ in filter() }
+                    .onChange(of: searchText) { filter() }
                 }
             }
             .navigationTitle("Import Contacts")
