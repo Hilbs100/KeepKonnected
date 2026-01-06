@@ -336,7 +336,7 @@ final class Contact: Identifiable, Equatable {
         
         let triggerDateComponents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: nextDate)
         let trigger = UNCalendarNotificationTrigger(dateMatching: triggerDateComponents, repeats: false)
-        let request = UNNotificationRequest(identifier: "sh.KeepKonnected.\(self.identifier)", content: content, trigger: trigger)
+        let request = UNNotificationRequest(identifier: "SamHilbert.KeepKonnected.\(self.identifier)", content: content, trigger: trigger)
         
         UNUserNotificationCenter.current().add(request) { error in
             if let error = error {

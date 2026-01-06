@@ -37,7 +37,7 @@ struct KeepKonnectedApp: App {
         self.notificationHandler = handler
         UNUserNotificationCenter.current().delegate = handler
         
-        BGTaskScheduler.shared.register(forTaskWithIdentifier: "com.samuelhilbert.KeepKonnected.refresh", using: nil)
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: "com.SamHilbert.KeepKonnected.refresh", using: nil)
         { task in
             logger.log("Handling background task")
             NotificationScheduler.handleAppRefresh(task: task as! BGAppRefreshTask)

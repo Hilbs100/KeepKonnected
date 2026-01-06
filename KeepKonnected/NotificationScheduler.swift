@@ -20,7 +20,7 @@ struct NotificationScheduler {
     
     static func scheduleBackgroundTask() {
         
-        let request = BGAppRefreshTaskRequest(identifier: "com.samuelhilbert.KeepKonnected.refresh")
+        let request = BGAppRefreshTaskRequest(identifier: "com.SamHilbert.KeepKonnected.refresh")
         let calendar = Calendar.current
         
         // Schedule to run every Saturday at 6 PM
