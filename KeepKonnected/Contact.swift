@@ -158,25 +158,21 @@ final class Contact: Identifiable, Equatable {
     static func updateProbabilities() {
         probabilityQueue.sync {
             let now = Date()
-            
-            // Get current day
             let calendar = Calendar.current
-            let currentWeekday = calendar.component(.weekday, from: now) - 1 //
-            
-            // Get current time
+            let currentWeekday = calendar.component(.weekday, from: now) - 1
             let currentHour = calendar.component(.hour, from: now)
             let currentMinute = calendar.component(.minute, from: now)
             let currentQuarter = currentHour * quarterHours + currentMinute / quarterMins
-            
-            // Increase probability for current day and time
-            if var weekday_times = Contact.WeekdayTimes {
-                weekday_times[currentWeekday][currentQuarter] *= 1.5
-                Contact.WeekdayTimes![currentWeekday] = Contact.normalize(input: weekday_times[currentWeekday])
+
+            if var weekdayTimes = _WeekdayTimes {
+                weekdayTimes[currentWeekday][currentQuarter] *= 1.5
+                weekdayTimes[currentWeekday] = Contact.normalize(input: weekdayTimes[currentWeekday])
+                _WeekdayTimes = weekdayTimes
             }
-            
-            if var weekdays = Contact.Weekdays {
+
+            if var weekdays = _Weekdays {
                 weekdays[currentWeekday] *= 1.05
-                Contact.Weekdays = Contact.normalize(input: weekdays)
+                _Weekdays = Contact.normalize(input: weekdays)
             }
         }
     }
