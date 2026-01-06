@@ -3,7 +3,7 @@
 //  KeepKonnected
 //
 //  Created by Samuel Hilbert on 10/17/25.
-//  AI Usage: Largely for init(), otherewise written by me
+//  AI Usage: Largely for init(), otherwise written by me
 //
 
 import SwiftUI
@@ -40,7 +40,12 @@ struct KeepKonnectedApp: App {
         BGTaskScheduler.shared.register(forTaskWithIdentifier: "com.SamHilbert.KeepKonnected.refresh", using: nil)
         { task in
             logger.log("Handling background task")
-            NotificationScheduler.handleAppRefresh(task: task as! BGAppRefreshTask)
+            guard let refreshTask = task as? BGAppRefreshTask else {
+                logger.error("Received unexpected BGTask type: \(String(describing: type(of: task))) for app refresh identifier")
+                task.setTaskCompleted(success: false)
+                return
+            }
+            NotificationScheduler.handleAppRefresh(task: refreshTask)
         }
     }
     

@@ -4,7 +4,7 @@
 <dict>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
-		<string>com.samuelhilbert.KeepKonnected.refresh</string>
+		<string>com.SamHilbert.KeepKonnected.refresh</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>

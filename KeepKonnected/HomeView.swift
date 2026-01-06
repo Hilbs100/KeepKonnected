@@ -1,4 +1,4 @@
-// AI Usage: This file was mostly wrriten by me, with minor help from AI for small UI parts.
+// AI Usage: This file was mostly written by me, with minor help from AI for small UI parts.
 
 import SwiftUI
 import Contacts
@@ -24,7 +24,7 @@ struct HomeView: View {
             ZStack {
                 // Contacts list (value-based navigation)
                 ContactsView(contact_type: selectedType)
-                    .onChange(of: scenePhase) { newPhase, oldPhase in
+                    .onChange(of: scenePhase) {
                         Contact.weeklyNotifications(contacts: contacts)
                     }
 
@@ -78,7 +78,7 @@ struct HomeView: View {
                 }
             }
             // When the appState id changes (e.g. notification tapped), reset and push the id
-            .onChange(of: appState.selectedContactID) { old_id, id in
+            .onChange(of: appState.selectedContactID) { _, id in
                 if let id = id {
                     // Reset path so we override current detail stack, then push target id
                     path = NavigationPath()

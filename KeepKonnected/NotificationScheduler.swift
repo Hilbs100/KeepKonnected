@@ -23,7 +23,7 @@ struct NotificationScheduler {
         let request = BGAppRefreshTaskRequest(identifier: "com.SamHilbert.KeepKonnected.refresh")
         let calendar = Calendar.current
         
-        // Schedule to run every Saturday at 6 PM
+        // Schedule to run every Saturday at 12 PM
         if let nextSaturday12PM = calendar.nextDate(after: Date(), matching: DateComponents(hour: 12, minute: 0, weekday: 7), matchingPolicy: .nextTime) {
             request.earliestBeginDate = nextSaturday12PM
         } else {
