@@ -6,6 +6,7 @@ import UIKit
 
 struct ContactDetailView: View {
     let contact: Contact
+    @EnvironmentObject var appState: AppState
     @Environment(\.dismiss) private var dismiss
 
     private var primaryPhone: String? { contact.phoneNumbers.first }
@@ -102,7 +103,11 @@ struct ContactDetailView: View {
 
                 // Call button centered at bottom spanning 3/5 of width
                 if let phone = primaryPhone, !sanitizedPhone(phone).isEmpty {
-                    Button(action: { call(phone: phone) }) {
+                    Button(action:
+                            {
+                        call(phone: phone)
+                        Contact.updateProbabilities()
+                    }) {
                         Text("Call")
                             .font(.headline)
                             .foregroundColor(.white)
@@ -122,11 +127,17 @@ struct ContactDetailView: View {
                     .padding(.bottom, max(geo.safeAreaInsets.bottom, 16))
                 }
 
-                
+
             }
             .navigationTitle(contact.displayName)
             .navigationBarTitleDisplayMode(.inline)
         }
-        // .onAppear(perform: contact.createNotification)
+//        .onAppear {
+//            contact.createTestNotif()
+//        } // For testing notification handling
+        .onDisappear {
+            appState.selectedContactID = nil
+        }
     }
 }
+

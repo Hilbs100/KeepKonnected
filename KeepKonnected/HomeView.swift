@@ -78,7 +78,7 @@ struct HomeView: View {
                 }
             }
             // When the appState id changes (e.g. notification tapped), reset and push the id
-            .onChange(of: appState.selectedContactID) { id, old_id in
+            .onChange(of: appState.selectedContactID) { old_id, id in
                 if let id = id {
                     // Reset path so we override current detail stack, then push target id
                     path = NavigationPath()

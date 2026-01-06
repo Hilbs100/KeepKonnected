@@ -48,7 +48,7 @@ struct ContactsView: View {
                 } else {
                     ForEach(visibleContacts) { c in
                         // Use a NavigationLink as the row label directly (no hidden link)
-                        NavigationLink(value: c.id) {
+                        NavigationLink(value: c.identifier) {
                             HStack (spacing: 12) {
                                 // order number (1-based)
                                 Text("\(c.order + 1)")
@@ -107,14 +107,6 @@ struct ContactsView: View {
         }
         .alert(item: $alertMessage) { msg in
             Alert(title: Text("Import"), message: Text(msg.message), dismissButton: .default(Text("OK")))
-        }
-        // navigation destination resolves the contact id to the actual Contact object
-        .navigationDestination(for: String.self) { id in
-            if let contact = contacts.first(where: { $0.id == id }) {
-                ContactDetailView(contact: contact)
-            } else {
-                EmptyView()
-            }
         }
         
     }
@@ -290,3 +282,4 @@ struct ContactsView: View {
 //        .modelContainer(for: Contact.self)
 //        .preferredColorScheme(.dark)
 //}
+
